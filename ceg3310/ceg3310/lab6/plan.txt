@@ -1,0 +1,681 @@
+#include
+void MoveDisk (int diskNumber, int startPost, int endPost, int midPost) {
+  if (diskNumber > 1) {
+    MoveDisk (diskNumber-1,startPost, midPost, endPost);
+    printf ("Move disk %d from post %d to post %d.\n",
+             diskNumber, startPost, endPost);
+    MoveDisk (diskNumber-1, midPost, endPost, startPost);
+  } else {
+    printf ("Move disk 1 from post %d to post %d.\n",
+             startPost, endPost);
+  }
+  return;
+}
+void main () {
+   int n;
+   printf ("--Towers of Hanoi--\nHow many disks? ");
+   scanf ("%d", &n);
+   printf ("Instructions to move %d disks from post 1 to post 3:\n",n);
+   MoveDisk (n,1,3,2);
+   return;
+}
+
+Turn this C source code into LC3 Assembly language using the stack
+
+Example Run
+
+--Towers of Hanoi--
+How many disks? 3                                           ;   Take in input, only integers 0-9
+Instructions to move 3 disks from post 1 to post 3:         ;   Print statement (Disknum, start, end)
+Move disk 1 from post 1 to post 3.                          ;   Else 113
+Move disk 2 from post 1 to post 2.                          ;   P(212)
+Move disk 1 from post 3 to post 2.                          ;   Else 132
+Move disk 3 from post 1 to post 3.                          ;   P(313)
+Move disk 1 from post 2 to post 1.                          ;   Else 121
+Move disk 2 from post 2 to post 3.                          ;   P(223)
+Move disk 1 from post 1 to post 3.                          ;   Else 113
+
+// DUMMED DOWN METHOD                 //  Explicit                               // INDEX NOTATION BASED ON R5
+void MOVE (Disknum, start, end, mid)  //  MOVE 3132                              //  MOVE (4567)
+        MOVE(num - 1, start, mid, end)//        Move 2123, Move 1132, ELSE 113   //          MOVE(4567) --> MOVE(4567) --> ELSE 456
+        PRINT(Disknum, start, end)    //            P(212)                       //             PRINT(456)
+        MOVE(num - 1, mid, end, start)//            MOVE2 1321, ELSE 132         //             MOVE(4) --> MOVE() --> ELSE
+    ELSE                              //        P(313)                           //      ELSE
+        PRINT(1, start, end)          //        MOVE2 2231, MOVE 1213, ELSE 121  //          PRINT()
+                                      //            P(223)                       //
+                                      //            MOVE2 1132, ELSE 113
+
+STACK FRAMES
+MAIN
+x4FFB DA    0003
+x4FFC DL    0000
+x4FFD RA    FINAL
+x4FFE RV    0000
+x4FFF P     0000
+x5000 NULL  0000
+
+MOVE 3132   ||||    R5 INDEX
+x4FF3 DA    0000       #0
+x4FF4 DL    4FFB       #1
+x4FF5 RA    FINAL      #2
+x4FF6 RV    0000       #3
+x4FF7 DiskN 0003       #4
+x4FF8 START 0001       #5
+x4FF9 END   0003       #6
+x4FFA MID   0002       #7
+
+MOVE 2123   ||||    R5 INDEX
+x4FEB DA    0000        #0
+x4FEC DL    4FF3        #1
+x4FED RA    J1+1        #2
+x4FEE RV    0000        #3
+x4FEF DISKN 0002        #4
+x4FF0 START 0001        #5
+x4FF1 END   0002        #6
+x4FF2 MID   0003        #7
+
+MOVE 1132   ||||    R5 INDEX
+x4FE3 DA    0000        #0
+x4FE4 DL    4FEB        #1
+x4FE5 RA    J1+1        #2
+x4FE6 RV    0000        #3
+x4FE7 DISKN 0001        #4
+x4FE8 START 0001        #5
+x4FE9 END   0003        #6
+x4FEA MID   0002        #7
+
+    ELSE 113
+    REMOVE STACKFRAME
+    P 212
+
+MOVE2 1321  ||||    R5 INDEX   MOVE2(Disknum - 1, mid, end, start)
+x4FE3 DA    0000        #0
+x4FE4 DL    4FEB        #1
+x4FE5 RA    J2+1        #2
+x4FE6 RV    0000        #3
+x4FE7 DISKN 0001        #4
+x4FE8 MID   0003        #5
+x4FE9 END   0002        #6
+x4FEA START 0001        #7
+
+    REMOVE STACKFRAME (R5 and R6 = 4FEB)
+    REMOVE STACKFRAME (R5 and R6 = 4FF3)
+
+MOVE2 2231  ||||    R5 INDEX
+x4FEB DA    0000        #0
+x4FEC DL    4FF3        #1
+x4FED RA    J2+1        #2
+x4FEE RV    0000        #3
+x4FEF DISKN 0002        #4
+x4FF0 MID   0002        #5
+x4FF1 END   0003        #6
+x4FF2 START 0001        #7
+
+MOVE 1213  ||||    R5 INDEX
+x4FE3 DA    0000        #0
+x4FE4 DL    4FEB        #1
+x4FE5 RA    J1+1        #2
+x4FE6 RV    0000        #3
+x4FE7 DISKN 0001        #4
+x4FE8 START 0002        #5
+x4FE9 MID   0001        #6
+x4FEA END   0003        #7
+
+    ELSE 121
+    REMOVE STACKFRAME (R5 and R6 = 4FEB)
+    P 223
+
+MOVE2 1132  ||||    R5 INDEX
+x4FE3 DA    0000        #0
+x4FE4 DL    4FEB        #1
+x4FE5 RA    J2+1        #2
+x4FE6 RV    0000        #3
+x4FE7 DISKN 0001        #4
+x4FE8 MID   0001        #5
+x4FE9 END   0003        #6
+x4FEA START 0002        #7
+
+    ELSE 113
+    REMOVE STACK FRAME (R5 and R6 = 4FEB)
+    REMOVE STACK FRAME (R5 and R6 = 4FF3)
+    SET R7 to RA. R7 = FINAL
+    JUMP TO FINAL
+    HALT
+
+THE PROGRAM OUTLINE
+.ORIG x3000
+; GET INPUT
+; VALIDATE INPUT
+; CREATE MAIN STACK FRAME
+
+MAIN
+x4FFB DA    0003
+x4FFC DL    0000
+x4FFD RA    FINAL
+x4FFE RV    0000
+x4FFF P     0000
+x5000 NULL  0000
+
+; CREATE MOVE 3132 STACK FRAME
+
+MOVE 3132   ||||    R5 INDEX
+x4FF3 DA    0000       #0
+x4FF4 DL    4FFB       #1
+x4FF5 RA    FINAL      #2
+x4FF6 RV    0000       #3
+x4FF7 DiskN 0003       #4
+x4FF8 START 0001       #5
+x4FF9 END   0003       #6
+x4FFA MID   0002       #7
+
+; JSR MOVE
+
+&FINAL .HALT
+
+MOVE FUNCTION                       MOVE 2123                       MOVE 1132
+; CHECK DISKN > 1                   ; CHECK DISKN > 1               ; CHECK DISKN > 1
+; CREATE MOVE 2123 STACK FRAME      ; CREATE MOVE 1132 STACK FRAME  ; ELSE 113
+-----------------------------------------------------------------------------------------------------
+MOVE 2123   ||||    R5 INDEX |      MOVE 1132   ||||    R5 INDEX    |
+x4FEB DA    0000        #0   |      x4FE3 DA    0000        #0      |
+x4FEC DL    4FF3        #1   |      x4FE4 DL    4FEB        #1      |
+x4FED RA    J1+1        #2   |      x4FE5 RA    J1+1        #2      |
+x4FEE RV    0000        #3   |      x4FE6 RV    0000        #3      |
+x4FEF DISKN 0002        #4   |      x4FE7 DISKN 0001        #4      |
+x4FF0 START 0001        #5   |      x4FE8 START 0001        #5      |
+x4FF1 END   0002        #6   |      x4FE9 END   0003        #6      |
+x4FF2 MID   0003        #7   |      x4FEA MID   0002        #7      |
+-----------------------------------------------------------------------------------------------------
+&J1  ; JSR MOVE 2123        ----->  ; JSR MOVE 1132         ------> ; R7 = RA, REMOVE STACKFRAME, RET
+                                    |            |<--------------------------------------------------
+                                    RETURNED HERE                   MOVE2 1321
+                                    ; P(212)                        ; CHECK DISKN > 1
+                                    ; CREATE MOVE2 1321 STACKFRAME  ; ELSE 132
+                                    -----------------------------------------------------------------
+                                    | MOVE2 1321  ||||    R5 INDEX |
+                                    | x4FE3 DA    0000        #0   |
+                                    | x4FE4 DL    4FEB        #1   |
+                                    | x4FE5 RA    J2+1        #2   |
+                                    | x4FE6 RV    0000        #3   |
+                                    | x4FE7 DISKN 0001        #4   |
+                                    | x4FE8 MID   0003        #5   |
+                                    | x4FE9 END   0002        #6   |
+                                    | x4FEA START 0001        #7   |
+                                    -----------------------------------------------------------------
+                                    ; JSR MOVE2 1321        ------> ; R7 = RA, REMOVE STACKFRAME, RET
+                                    |            |<--------------------------------------------------
+                                    RETURNED HERE
+                                    (CURRENT STACKFRAME = 2123 so RA = J1+1)
+                                    R7 = RA
+                                    REMOVE STACKFRAME (STACKFRAME NOW = MOVE 3132 STACKFRAME)
+                                    RET
+|            |<----------------------------------------------------
+@J1+1RETURNED HERE                   MOVE2 2231                     MOVE 1213
+    ; P(313)                        ; CHECK DISKN > 1               ; CHECK DISKN > 1
+    ; CREATE MOVE2 2231 STACKFRAME  ; CREATE MOVE 1213 STACKFRAME   ; ELSE 121
+------------------------------------------------------------------------------------------------------
+MOVE2 2231  ||||    R5 INDEX |      MOVE 1213   ||||    R5 INDEX|
+x4FEB DA    0000        #0   |      x4FE3 DA    0000        #0  |
+x4FEC DL    4FF3        #1   |      x4FE4 DL    4FEB        #1  |
+x4FED RA    J2+1        #2   |      x4FE5 RA    J1+1        #2  |
+x4FEE RV    0000        #3   |      x4FE6 RV    0000        #3  |
+x4FEF DISKN 0002        #4   |      x4FE7 DISKN 0001        #4  |
+x4FF0 MID   0002        #5   |      x4FE8 START 0002        #5  |
+x4FF1 END   0003        #6   |      x4FE9 MID   0001        #6  |
+x4FF2 START 0001        #7   |      x4FEA END   0003        #7  |
+------------------------------------------------------------------------------------------------------
+@J2  ; JSR MOVE2 2231        ------> ; JSR MOVE 1213         ------> ; R7 = RA, REMOVE STACKFRAME, RET
+                                     |            |<--------------------------------------------------
+                                     RETURNED HERE                  ; MOVE2 1132
+                                     ; P(223)                       ; CHECK DISKN > 1
+                                     ; CREATE MOVE2 1132 STACKFRAME ; ELSE 113
+                                     -----------------------------------------------------------------
+                                     | MOVE2 1132  ||||    R5 INDEX |
+                                     | x4FE3 DA    0000        #0   |
+                                     | x4FE4 DL    4FEB        #1   |
+                                     | x4FE5 RA    J2+1        #2   |
+                                     | x4FE6 RV    0000        #3   |
+                                     | x4FE7 DISKN 0001        #4   |
+                                     | x4FE8 MID   0001        #5   |
+                                     | x4FE9 END   0003        #6   |
+                                     | x4FEA START 0002        #7   |
+                                     -----------------------------------------------------------------
+                                     ;JSR MOVE2 1132                ; R7 = RA, REMOVE STACKFRAME, RET
+                                     |            |<--------------------------------------------------
+                                     RETURNED HERE
+                                     (CURRENT STACKFRAME = MOVE2 2231 so RA = J2+1)
+                                     R7 = RA
+                                     REMOVE STACKFRAME (STACKFRAME NOW = MOVE 3132 STACKFRAME)
+                                     RET
+|            |<-----------------------------------------------------
+&ENDING (J2+1)  RETURNED HERE
+                ; R7 = RA
+                ; REMOVE STACKFRAME (REMOVES MOVE 3132 STACKFRAME)
+                ; RET (RETURNS TO &FINAL)
+
+THE CODE
+_______________________________________________________________
+        .ORIG x3000
+
+        ; Initialize the stack
+MAIN    LD R6, STACK
+
+        ; Initialize game with prompts
+        LEA R0, PROMPT
+        PUTS
+
+        ; Prints a new line
+        LEA R0, CARRET
+        LDR R0, R0, #0
+        OUT
+
+        ; Prints second part of prompt
+        LEA R0, PROMPT2
+        PUTS
+
+        ; Get the number of disks from the user
+GETD    GETC
+        OUT
+
+        ; Validate input by subracting x30 from user input
+        LEA R1, MINNUM  ; MINNIM is -x30
+        LDR R1, R1, #0
+        ADD R0, R0, R1
+
+        ; If the result is a number ranging from x0000 to x0009, it is valid
+        BRN GETD
+
+        ; R0 currently holds something, but it still might not be a number
+        ADD R0, R0, #-9
+
+        ; If negative or zero from this, input must've been a valid number
+        BRP GETD
+
+        ; Reincrement R0
+        ADD R0, R0, #9
+
+        ; Temporarily store R0 (DISKNUM) in R1
+        AND R1, R1, #0
+        ADD R1, R0, R1
+
+        ; Load a carriage return to print
+        LEA R0, CARRET
+        LDR R0, R0, #0
+        OUT
+
+        ; Put the DISKNUM back into R0
+        AND R0, R0, #0
+        ADD R0, R0, R1
+
+        ; Create Main's stack frame
+        ADD R6, R6, #-1 ; Increment once to store a dummy parameter variable
+        STR R1, R6, #0  ; Main's stackframe now contains one dummy variable at x4FFF
+        ADD R6, R6, #-1 ; Increment stack to address of main's return value (RV)
+        STR R1, R6, #0  ; Nothing specific needs to be stored here
+        ADD R6, R6, #-1 ; Increment stack to address of main's return address (RA)
+
+        ; Just in case something goes wrong, the RA of main will be set to FINAL
+        LEA R1, FINAL   ; Retrieve the address of FINAL and store it into R1
+        STR R1, R6      ; Store FINAL's address into the stack's RA
+
+        ; The next location on the stack is the dynamic link (DL)
+        ADD R6, R6, #-1
+
+        ; There is no previous R5 pointer so nothing needs to be put into the DL
+        AND R1, R1, #0  ; Clear the contents of R1
+        STR R1, R6, #0  ; Store a zero in the DL
+
+        ; Main contains one variable, n; in other words, the DISKNUM
+        ADD R6, R6, #-1 ; Increment R6 once more
+        STR R0, R6, #0  ; Store DISKNUM into main's stackframe
+
+        ; Set R5 to that address so that it points at main's one variable
+        AND R5, R5, #0
+        ADD R5, R5, R6
+
+        ; Main's stackframe is now complete:
+        ; MAIN's STACKFRAME
+        ;------------------
+        ; x4FFB DA    0003 <--R5 and R6 point here
+        ; x4FFC DL    0000
+        ; x4FFD RA    FINAL
+        ; x4FFE RV    0000
+        ; x4FFF P     0000
+        ; x5000 NULL  0000
+        ;------------------
+
+        ; Next, create the stackframe for MOVE 3132
+        ; Void MOVE (DISKNUM, START, END, MID)
+        ADD R6, R6, #-1 ; Increment R6 to first parameter address of MOVE n132
+
+        ; Use R1 to store these numbers in their appropriate addresses
+        ; Push 2 to the stack
+        ADD R1, R1, #2
+        STR R1, R6, #0  ; Store 2 into this address
+
+        ; Push 3 to the stack
+        ADD R6, R6, #-1 ; Next address
+        AND R1, R1, #0
+        ADD R1, R1, #3
+        STR R1, R6, #0  ; Store 3 into this address
+
+        ; Push 1 to the stack
+        ADD R6, R6, #-1 ; Next address
+        AND R1, R1, #0
+        ADD R1, R1, #1
+        STR R1, R6, #0  ; Store 1 into this address
+
+        ; Push DISKNUM to stack (R5 currently points at disknum)
+        ADD R6, R6, #-1 ; Next address
+        LDR R1, R5, #0  ; Load DISKNUM from where R5 points
+        STR R1, R6, #0  ; Stores DISKNUM into this address
+
+        ; Next is the RV (which can be skipped)
+        ADD R6, R6, #-2 ; By adding -2 to R6, the stack is now on the RA
+
+        ; Store the address of FINAL to this RA
+        LEA R1, FINAL
+        STR R1, R6, #0  ; Stores the address of FINAL to the RA
+
+        ; Next is the dynamic link. Point it at main's DA
+        ADD R6, R6, #-1
+        STR R5, R6, #0  ; Stores the location of main's DA into MOVE 3132's DL
+
+        ; The MOVE function contains no local variables
+        ; Increment R6 once again and store a dummy variable
+        ADD R6, R6, #-1
+        AND R1, R1, #0
+        STR R1, R6, #0  ; Stores a dummy value (0) into the dummy address (DA)
+
+        ; Point R5 to this new DA
+        AND R5, R5, #0
+        ADD R5, R5, R6  ; R5 now points to the DA of MOVE 3132
+
+        ; MOVE n132's stackframe is now complete:
+        ;-----------------------------
+        ; MOVE n132   ||||    R5 INDEX
+        ; x4FF3 DA    0000       #0
+        ; x4FF4 DL    4FFB       #1
+        ; x4FF5 RA    FINAL      #2
+        ; x4FF6 RV    0000       #3
+        ; x4FF7 DiskN 000n       #4
+        ; x4FF8 START 0001       #5
+        ; x4FF9 END   0003       #6
+        ; x4FFA MID   0002       #7
+        ;-----------------------------
+
+        ; Print: "Instructions to move " + DISKNUM + " disks from post 1 to post 3.\n"
+        ; Print the first part of the prompt
+        LEA R0, PROMPT3
+        PUTS
+
+        ; Print the DISKNUM (Index 4 when using LDR on R5)
+        LDR R0, R5, #4  ; Loads DISKNUM into R0 by using R5
+
+        ; Make DISKNUM a printable character by adding x0030 to it
+        LEA R1, NUM
+        LDR R1, R1, #0
+        ADD R0, R0, R1
+        OUT             ; Prints the DISKNUM to the console
+
+        ; Print the second part of the prompt
+        LEA R0, PROMPT4
+        PUTS
+
+        ; Finally, print a new line
+        LEA R0, CARRET
+        LDR R0, R0, #0
+        OUT
+
+        ; Now, recursively call MOVE until all steps have been printed
+        JSR MOVE
+
+FINAL HALT
+
+; Memory locations after HALT
+
+STACK   .FILL x5000
+CARRET  .FILL x000A
+MINNUM  .FILL xFFD0
+NUM     .FILL x0030
+PROMPT  .STRINGZ "Towers of Hanoi--"
+PROMPT2 .STRINGZ "How many disks? "
+PROMPT3 .STRINGZ "Instructions to move "
+PROMPT4 .STRINGZ " disks from post 1 to post 3."
+
+; SUBROUTINE MOVE
+; First task: verify that DISKNUM > 1
+MOVE    AND R1, R1, #0  ; Clear R1 to use here for a comparison
+        LDR R0, R5, #4  ; Load the DISKNUM into R0 via R5 and an index of 4
+        ADD R1, R0, #-1 ; If negative or zero, that means that disknum <= 1
+        BRNZ ELSE
+
+        ; Otherwise, the disknum > 1 so perform the following tasks:
+        ; Create a new stack frame of the form -- (DISKNUM - 1, START, MID, END)
+        ; Or in terms of an index relative to R5 ([index 4] - 1, 5, 7, 6)
+        ADD R6, R6, #-1 ; Increment R6 to begin the new stackframe
+        LDR R1, R5, #6  ; Grabs the 3th parameter from the last stackframe
+        STR R1, R6, #0  ; Stores parameter into this address
+
+        ; Repeat this for the next three parameters
+        ADD R6, R6, #-1
+        LDR R1, R5, #7
+        STR R1, R6, #0 ; Stores parameter into this address
+        ADD R6, R6, #-1
+        LDR R1, R5, #5
+        STR R1, R6, #0  ; Stores parameter into this address
+        ADD R6, R6, #-1
+        LDR, R1, R5, #4
+
+        ; This final parameter is special since it is the DISKNUM
+        ; DISKNUM - 1 needs to be stored into this address
+        ADD R1, R1, #-1
+        STR R1, R6, #0  ; Stores DISKNUM - 1 into this address
+
+        ; RV is not necessary. Skip it by incrementing R6 by -2
+        ADD R6, R6, #-2
+
+        ; The RA for this stackframe will be the address of JUMP1 + 1
+        LEA R1, JUMP1
+        ADD R1, R1, #1
+        STR R1, R6, #0  ; Stores the address of JUMP1 + 1 into this address
+
+        ; Store R5 into this stackframe's DL
+        ADD R6, R6, #-1 ; Increment to the DL's address
+        STR R5, R6, #0  ; Stores previous DA location into this stackframe's DL
+
+        ; Create a DA for this stackframe
+        ADD R6, R6, #-1
+        AND R1, R1, #0
+        STR R1, R6, #0  ; Stores 0000 into this stackframe's DA
+
+        ; Set R5 to this DA
+        AND R5, R5, #0
+        ADD R5, R5, R6
+
+        ; The next MOVE's stackframe is complete.
+        ; Depending on recursion, it should look like this:
+        ;----------------------------------------------------------------
+        ; (Using an initial DISKNUM of 3 would make this stackframe this)
+        ; MOVE 2123   ||||    R5 INDEX
+        ; x4FEB DA    0000        #0
+        ; x4FEC DL    4FF3        #1
+        ; x4FED RA    J1+1        #2
+        ; x4FEE RV    0000        #3
+        ; x4FEF DISKN 0002        #4
+        ; x4FF0 START 0001        #5
+        ; x4FF1 END   0002        #6
+        ; x4FF2 MID   0003        #7
+        ;----------------------------------------------------------------
+
+        ; First recursive call
+JUMP1   JSR MOVE
+
+        ; Reaching here means that the print statement needs to be executed
+        ; Print: "Move disk " + DISKNUM + " from post " + START + " to post " + END + ".\n"
+        ; Indexes: DISKNUM = 4, START = 5, END = 6 (Relative to R5)
+
+        ; Print first prompt
+        LEA R0, MIDP1
+        PUTS    ; Prints "Move disk "
+
+        ; Print DISKNUM
+        ; To make this a printable character, add x0030 to it
+        LDR R0, R5, #4
+        LEA R1, NUM
+        LDR R1, R1, #0
+        ADD R0, R0, R1
+        OUT     ; Prints the DISKNUM
+
+        ; Print second prompt
+        LEA R0, MIDP2
+        PUTS
+
+        ; Print START (also needs x0030 added to it)
+        LDR R0, R5, #5
+        ADD R0, R0, R1  ; R1 still contains x0030
+        OUT
+
+        ; Print third prompt
+        LEA R0, MIDP3
+        PUTS    ; Prints " to post "
+
+        ; Print END
+        LDR R0, R5, #6
+        ADD R0, R0, R1
+        OUT
+
+        ; Print a period and carriage return
+        LEA R0, PERIOD
+        LDR R0, R0, #0
+        OUT
+        LEA R0, CARRET
+        LDR R0, R0, #0
+        OUT
+
+        ; Create a new stack frame in the form: (disknum - 1, mid, end, start)
+        ADD R6, R6, #-1 ; Increment to store first parameter
+        LDR R1, R5, #5  ; Index 5 grabs START
+        STR R1, R6, #0  ; Stores START first
+
+        ; Repeat this for the next three parameters
+        ADD R6, R6, #-1 ; Increment to next address
+        LDR R1, R5, #6
+        STR R1, R6, #0  ; Store parameter
+        ADD R6, R6, #-1 ; Increment address
+        LDR R1, R5, #7
+        STR R1, R6, #0  ; Store parameter
+        ADD R6, R6, #-1 ; Increment once more
+        LDR R1, R5, #4  ; Grab the DISKNUM
+
+        ; DISKNUM - 1 is needed here
+        ADD R1, R1, #-1
+        STR R1, R6, #0 ; Store DISKNUM - 1 to this address
+
+        ; Skip RV. Set RA to JUMP2 + 1
+        ADD R6, R6, #-2
+        LEA R1, JUMP2
+        ADD R1, R1, #1
+        STR R1, R6, #0
+
+        ; Store R5 into the  DL
+        ADD R6, R6, #-1 ; Increment R6 to the DL
+        STR R5, R6, #0  ; Stores R5 into the DL
+
+        ; Create new DA
+        ADD R6, R6, #-1
+        AND R1, R1, #0
+        STR R1, R6, #0
+
+        ; Set R5 to point at this location
+        AND R5, R5, #0
+        ADD R5, R5, R6
+
+        ; Stack frame is complete. Looks something like:
+        ;-----------------------------------------------
+        ; MOVE2 2231  ||||    R5 INDEX
+        ; x4FEB DA    0000        #0
+        ; x4FEC DL    4FF3        #1
+        ; x4FED RA    J2+1        #2
+        ; x4FEE RV    0000        #3
+        ; x4FEF DISKN 0002        #4
+        ; x4FF0 MID   0002        #5
+        ; x4FF1 END   0003        #6
+        ; x4FF2 START 0001        #7
+        ;-----------------------------------------------
+
+        ; Call MOVE2
+        ; (same as MOVE, just referred to as MOVE2 since it is the second MOVE in the MOVE function)
+JUMP2   JSR MOVE
+
+        ; All MOVEs will eventually reach this section
+        ; Arrives here due to a MOVE2's RA
+        ; Every MOVE that reaches this will do the following:
+        ; -- R7 equals the return address of the current stackframe
+        ; -- Remove the current stackframe
+        ; -- Return via R7
+
+        ; Set R7 to this stackframe's RA (Index of 2 via LDR on R5)
+        LDR R7, R5, #2
+
+        ; Clear this stackframe
+        ; None of the values in this stackframe are needed
+        ; Set R5 and R6 to the previous stackframe's DA (Index of 8 via LDR on R5)
+        ADD R6, R6, #8  ; R6 contains previous DA now
+        AND R5, R5, #0  ; Clear R5
+        ADD R5, R5, R6  ; Point R5 to previous DA
+
+        ; Now that the stackframe has been removed, return via R7
+        RET
+
+        ; This is the else statment of the MOVE function
+        ; Reaches here when DISKNUM <= 1
+        ; Print: "Move disk 1 from post " + START + " to post " + END + ".\n"
+ELSE    LEA R0, ELSEP1
+        PUTS    ; Prints: "Move disk 1 from post "
+
+        ; Print start post
+        LDR R0, R5, #5
+        LEA R1, NUM
+        LDR R1, R1, #0
+        ADD R0, R0, R1  ; Make the number a printable character
+        OUT     ; Prints the start post
+
+        ; Print next prompt
+        LEA R0, MIDP3
+        PUTS    ; Prints " to post "
+
+        ; Print end post
+        LDR R0, R5, #6
+        ADD R0, R0, R1
+        OUT
+
+        ; Print period and new line
+        LEA R0, PERIOD
+        LDR R0, R0, #0
+        OUT
+        LEA R0, CARRET
+        LDR R0, R0, #0
+        OUT
+
+        ; Set R7 = RA
+        LDR R7, R5, #2
+
+        ; Remove current stackframe
+        ; No values are needed. Set R5 and R6 to previous DA
+        ADD R6, R6, #8
+        AND R5, R5, #0
+        ADD R5, R5, R6
+
+        ; Return from the function
+        ; A MOVE will send PC to JUMP1 + 1
+        ; A MOVE2 will send PC to JUMP2 + 1
+        RET
+
+; Memory locations used by MOVE
+MIDP1   .STRINGZ "Move disk "
+MIDP2   .STRINGZ " from post "
+MIDP3   .STRINGZ " to post "
+ELSEP1  .STRINGZ "Move disk 1 from post "
+PERIOD  .FILL x002E
+        .END
